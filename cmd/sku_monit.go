@@ -85,7 +85,7 @@ func PostMessage(token string) {
 
 }
 
-func SkuMonit() {
+func SkuLoadAndNotify() {
 	for _, user := range storage.QueryUser() {
 		PostMessage(user.Token)
 	}

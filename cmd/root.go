@@ -5,12 +5,13 @@ import (
 	"hewenda/go-rei/storage"
 	"log"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 )
 
 var addUrl string
-var isList bool
+var isMonit bool
 var delId string
 
 var rootCmd = &cobra.Command{
@@ -19,22 +20,31 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(addUrl) > 0 {
 			SkuAdd(addUrl)
-		} else if isList {
-			for _, item := range storage.LoadWish() {
-				fmt.Println(item.Id, item.Url, item.Skus)
-			}
+		} else if isMonit {
+			SkuMonit()
 		} else if len(delId) > 0 {
 			storage.DeleteWish(delId)
 		} else {
-			SkuMonit()
+			for _, item := range storage.LoadWish() {
+				fmt.Println(item.Id, item.Url, item.Skus)
+			}
 		}
 	},
 }
 
 func init() {
 	rootCmd.Flags().StringVarP(&addUrl, "add", "a", "", "Add a url to monit")
-	rootCmd.Flags().BoolVarP(&isList, "list", "l", false, "List monit")
+	rootCmd.Flags().BoolVarP(&isMonit, "monit", "m", false, "Monit")
 	rootCmd.Flags().StringVarP(&delId, "del", "d", "", "Del a id to monit")
+}
+
+func SkuMonit() {
+	ticker := time.NewTicker(1 * time.Hour)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		SkuLoadAndNotify()
+	}
 }
 
 func Execute() {
