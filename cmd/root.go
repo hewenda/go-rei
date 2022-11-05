@@ -1,30 +1,33 @@
 package cmd
 
 import (
-	"fmt"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
 )
 
+var addUrl string
+
 var rootCmd = &cobra.Command{
-	Use:   "hugo",
-	Short: "Hugo is a very fast static site generator",
-	Long: `A Fast and Flexible Static Site Generator built with
-love by spf13 and friends in Go.
-Complete documentation is available at http://hugo.spf13.com`,
+	Use:   "rei",
+	Short: "rei spider",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Hugo Static Site Generator v0.9 -- HEAD")
+		if len(addUrl) > 0 {
+			SkuAdd(addUrl)
+		} else {
+			SkuMonit()
+		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(CommandAddLink)
+	rootCmd.Flags().StringVarP(&addUrl, "add", "a", "", "Add a url to monit")
 }
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 		os.Exit(1)
 	}
 }

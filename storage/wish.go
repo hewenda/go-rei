@@ -3,40 +3,34 @@ package storage
 import (
 	"database/sql"
 	"log"
+	"strconv"
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 type Wish struct {
+	Id   int
 	Url  string
 	Skus []string
 }
 
-func init() {
-	db, err := sql.Open("sqlite3", "./storage.db")
-
-	if err != nil {
-		panic(err)
-	}
-
-	defer db.Close()
-
+func CreateWishTable() {
 	sqlStmt := `
 	create table if not exists wish (
-        id integer primary key autoincrement, 
+        id integer primary key, 
         url text,
         skus text
     );
 	`
-	_, err = db.Exec(sqlStmt)
+	_, err := db.Exec(sqlStmt)
 	if err != nil {
 		log.Printf("%q: %s\n", err, sqlStmt)
 		return
 	}
 }
 
-func InsertWish(url string, skus []string) {
+func InsertWish(idString string, url string, skus []string) {
 	db, err := sql.Open("sqlite3", "./storage.db")
 
 	if err != nil {
@@ -49,13 +43,18 @@ func InsertWish(url string, skus []string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	stmt, err := tx.Prepare("insert into wish(url, skus) values(?, ?)")
+	stmt, err := tx.Prepare("insert or replace into wish(id, url, skus) values(?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(url, strings.Join(skus, ","))
+	id, err := strconv.Atoi(idString)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = stmt.Exec(id, url, strings.Join(skus, ","))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -76,7 +75,7 @@ func LoadWish() []Wish {
 
 	defer db.Close()
 
-	rows, err := db.Query("select url, skus from wish")
+	rows, err := db.Query("select id, url, skus from wish")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -85,14 +84,17 @@ func LoadWish() []Wish {
 	var wishList []Wish
 
 	for rows.Next() {
+		var id int
 		var url string
 		var skus string
-		err = rows.Scan(&url, &skus)
+
+		err = rows.Scan(&id, &url, &skus)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		wishList = append(wishList, Wish{
+			Id:   id,
 			Url:  url,
 			Skus: strings.Split(skus, ","),
 		})
