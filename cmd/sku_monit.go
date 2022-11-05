@@ -9,42 +9,29 @@ import (
 	"net/http"
 )
 
-func Contains(sl []string, name string) bool {
-	for _, value := range sl {
-		if value == name {
-			return true
-		}
-	}
-	return false
-}
-
 func GetAvailableSkus() (string, bool) {
-	wishItems := storage.LoadWish()
+	product := storage.QueryProduct()
 
 	output := new(bytes.Buffer)
 	oops := false
 
-	for _, item := range wishItems {
+	for _, item := range product {
 		result := new(bytes.Buffer)
 
 		data := spider.GetUrlModel(item.Url)
 		skus := spider.GetAvailableSkus(data)
 
 		for _, sku := range skus {
-			if Contains(item.Skus, sku.SkuID) {
+			if sku.Price.SavingsPercentage != nil {
+				oops = true
+
 				result.WriteString(
 					fmt.Sprintf(
 						"%s %s $%.2f=>%.2f",
 						sku.Color.DisplayLabel, sku.Size.Name, sku.Price.CompareAt.Value, sku.Price.Price.Value,
 					),
 				)
-				if sku.Price.SavingsPercentage != nil {
-					oops = true
-					result.WriteString(fmt.Sprintf(" %v%%Off\n", sku.Price.SavingsPercentage))
-				} else {
-					result.WriteString("\n")
-
-				}
+				result.WriteString(fmt.Sprintf(" %v%%Off\n", sku.Price.SavingsPercentage))
 			}
 		}
 		if result.Len() > 0 {

@@ -5,7 +5,6 @@ import (
 	"hewenda/go-rei/storage"
 	"log"
 	"os"
-	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -14,20 +13,26 @@ var addUrl string
 var isMonit bool
 var delId string
 
+func listProcut() {
+	for _, item := range storage.QueryProduct() {
+		fmt.Println(item.Id, item.Url)
+	}
+}
+
 var rootCmd = &cobra.Command{
 	Use:   "rei",
 	Short: "rei spider",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(addUrl) > 0 {
 			SkuAdd(addUrl)
+			listProcut()
 		} else if isMonit {
 			SkuMonit()
 		} else if len(delId) > 0 {
-			storage.DeleteWish(delId)
+			storage.DeleteProduct(delId)
+			listProcut()
 		} else {
-			for _, item := range storage.LoadWish() {
-				fmt.Println(item.Id, item.Url, item.Skus)
-			}
+			listProcut()
 		}
 	},
 }
@@ -39,12 +44,13 @@ func init() {
 }
 
 func SkuMonit() {
-	ticker := time.NewTicker(1 * time.Hour)
-	defer ticker.Stop()
+	SkuLoadAndNotify()
+	// ticker := time.NewTicker(1 * time.Hour)
+	// defer ticker.Stop()
 
-	for range ticker.C {
-		SkuLoadAndNotify()
-	}
+	// for range ticker.C {
+	// 	SkuLoadAndNotify()
+	// }
 }
 
 func Execute() {

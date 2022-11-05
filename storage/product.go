@@ -4,23 +4,20 @@ import (
 	"database/sql"
 	"log"
 	"strconv"
-	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type Wish struct {
-	Id   int
-	Url  string
-	Skus []string
+type Product struct {
+	Id  int
+	Url string
 }
 
-func CreateWishTable() {
+func CreateProductTable() {
 	sqlStmt := `
-	create table if not exists wish (
+	create table if not exists product (
         id integer primary key, 
-        url text,
-        skus text
+        url text
     );
 	`
 	_, err := db.Exec(sqlStmt)
@@ -30,7 +27,7 @@ func CreateWishTable() {
 	}
 }
 
-func InsertWish(idString string, url string, skus []string) {
+func InsertProduct(idString string, url string) {
 	db, err := sql.Open("sqlite3", "./storage.db")
 
 	if err != nil {
@@ -43,7 +40,7 @@ func InsertWish(idString string, url string, skus []string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	stmt, err := tx.Prepare("insert or replace into wish(id, url, skus) values(?, ?, ?)")
+	stmt, err := tx.Prepare("insert or replace into product(id, url) values(?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -54,7 +51,7 @@ func InsertWish(idString string, url string, skus []string) {
 		log.Fatal(err)
 	}
 
-	_, err = stmt.Exec(id, url, strings.Join(skus, ","))
+	_, err = stmt.Exec(id, url)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -66,7 +63,7 @@ func InsertWish(idString string, url string, skus []string) {
 	}
 }
 
-func LoadWish() []Wish {
+func QueryProduct() []Product {
 	db, err := sql.Open("sqlite3", "./storage.db")
 
 	if err != nil {
@@ -75,41 +72,39 @@ func LoadWish() []Wish {
 
 	defer db.Close()
 
-	rows, err := db.Query("select id, url, skus from wish")
+	rows, err := db.Query("select id, url from product")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 
-	var wishList []Wish
+	var product []Product
 
 	for rows.Next() {
 		var id int
 		var url string
-		var skus string
 
-		err = rows.Scan(&id, &url, &skus)
+		err = rows.Scan(&id, &url)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		wishList = append(wishList, Wish{
-			Id:   id,
-			Url:  url,
-			Skus: strings.Split(skus, ","),
+		product = append(product, Product{
+			Id:  id,
+			Url: url,
 		})
 	}
 
-	return wishList
+	return product
 }
 
-func DeleteWish(id string) {
+func DeleteProduct(id string) {
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	stmt, err := tx.Prepare("delete from wish where id = ?")
+	stmt, err := tx.Prepare("delete from product where id = ?")
 	if err != nil {
 		log.Fatal(err)
 	}

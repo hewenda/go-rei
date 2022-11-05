@@ -24,6 +24,6 @@ func OpenDatabase() error {
 }
 
 func CreateTable() {
-	CreateWishTable()
+	CreateProductTable()
 	CreateUserTable()
 }
