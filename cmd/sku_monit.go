@@ -34,13 +34,13 @@ func GetAvailableSkus() (string, bool) {
 			if Contains(item.Skus, sku.SkuID) {
 				result.WriteString(
 					fmt.Sprintf(
-						"[%s] %s %s $%.2f=>%.2f",
-						sku.SkuID, sku.Color.DisplayLabel, sku.Size.Name, sku.Price.CompareAt.Value, sku.Price.Price.Value,
+						"%s %s $%.2f=>%.2f",
+						sku.Color.DisplayLabel, sku.Size.Name, sku.Price.CompareAt.Value, sku.Price.Price.Value,
 					),
 				)
 				if sku.Price.SavingsPercentage != nil {
 					oops = true
-					result.WriteString(fmt.Sprintf("%v%% off\n", sku.Price.SavingsPercentage))
+					result.WriteString(fmt.Sprintf(" %v%%Off\n", sku.Price.SavingsPercentage))
 				} else {
 					result.WriteString("\n")
 
@@ -49,7 +49,7 @@ func GetAvailableSkus() (string, bool) {
 		}
 		if result.Len() > 0 {
 			result.WriteString("\n")
-			output.WriteString(fmt.Sprintf("[%s](%s)\n```%s```", data.Title, item.Url, result.String()))
+			output.WriteString(fmt.Sprintf("[%s](%s)\n``` %s ```", data.Title, item.Url, result.String()))
 		}
 	}
 
@@ -58,6 +58,10 @@ func GetAvailableSkus() (string, bool) {
 
 func PostMessage(token string) {
 	content, oops := GetAvailableSkus()
+
+	if !oops {
+		return
+	}
 
 	baseUrl := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", token)
 

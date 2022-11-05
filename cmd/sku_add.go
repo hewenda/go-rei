@@ -14,7 +14,7 @@ import (
 var productUrl string
 var productId string
 
-var urlPartten = "^https://www.rei.com/product/([0-9]+)[/.+]?"
+var urlPartten = "^https://www.rei.com/.*product/([0-9]+)[/.+]?"
 
 func SkuAdd(url string) {
 	productUrl = url
@@ -27,7 +27,6 @@ func SkuAdd(url string) {
 	params := urlCompile.FindStringSubmatch(productUrl)
 
 	if len(params) >= 2 {
-		fmt.Println(params)
 		productId = params[1]
 	}
 

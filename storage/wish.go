@@ -102,3 +102,27 @@ func LoadWish() []Wish {
 
 	return wishList
 }
+
+func DeleteWish(id string) {
+	tx, err := db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	stmt, err := tx.Prepare("delete from wish where id = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = tx.Commit()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
