@@ -2,12 +2,11 @@ package cmd
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"hewenda/go-rei/spider"
 	"hewenda/go-rei/storage"
 	"net/http"
-	"net/url"
-	"time"
 )
 
 func Contains(sl []string, name string) bool {
@@ -19,13 +18,15 @@ func Contains(sl []string, name string) bool {
 	return false
 }
 
-func GetAvailableSkus() string {
+func GetAvailableSkus() (string, bool) {
 	wishItems := storage.LoadWish()
 
 	output := new(bytes.Buffer)
+	oops := false
 
 	for _, item := range wishItems {
 		result := new(bytes.Buffer)
+
 		data := spider.GetUrlModel(item.Url)
 		skus := spider.GetAvailableSkus(data)
 
@@ -38,6 +39,7 @@ func GetAvailableSkus() string {
 					),
 				)
 				if sku.Price.SavingsPercentage != nil {
+					oops = true
 					result.WriteString(fmt.Sprintf("%v%% off\n", sku.Price.SavingsPercentage))
 				} else {
 					result.WriteString("\n")
@@ -47,32 +49,34 @@ func GetAvailableSkus() string {
 		}
 		if result.Len() > 0 {
 			result.WriteString("\n")
-			output.WriteString(fmt.Sprintf("%s\n%s", data.Title, result.String()))
+			output.WriteString(fmt.Sprintf("[%s](%s)\n```%s```", data.Title, item.Url, result.String()))
 		}
 	}
 
-	return output.String()
+	return output.String(), oops
 }
 
 func PostMessage(token string) {
-	currentTime := time.Now()
+	content, oops := GetAvailableSkus()
 
-	title := currentTime.Format("2006-01-02 15:04")
-	content := GetAvailableSkus()
+	baseUrl := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", token)
 
-	baseUrl, _ := url.Parse("http://www.pushplus.plus/send")
+	data := make(map[string]interface{})
+	data["chat_id"] = -794133668
+	data["text"] = content
+	data["parse_mode"] = "Markdown"
+	data["disable_notification"] = !oops
+	b, _ := json.Marshal(data)
 
-	params := url.Values{}
-	params.Add("token", token)
-	params.Add("title", title)
-	params.Add("content", content)
+	fmt.Println(content)
 
-	baseUrl.RawQuery = params.Encode()
-
-	_, err := http.Get(baseUrl.String())
+	_, err := http.Post(
+		baseUrl,
+		"application/json",
+		bytes.NewBuffer(b),
+	)
 	if err != nil {
-		fmt.Println(baseUrl.String(), err)
-		return
+		fmt.Println(err)
 	}
 
 }
