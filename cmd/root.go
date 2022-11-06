@@ -47,7 +47,7 @@ func init() {
 func SkuMonit() {
 
 	c := cron.New()
-	c.AddFunc("0 0,30 * * * *", func() {
+	c.AddFunc("0 0 10-23 * * *", func() {
 		SkuLoadAndNotify()
 	})
 
