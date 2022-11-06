@@ -50,10 +50,11 @@ type Message struct {
 }
 
 func PostMessage(message Message) {
+	// https://api.telegram.org/bot${TOKEN}/getUpdates
 	baseUrl := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", message.Token)
 
 	data := make(map[string]interface{})
-	data["chat_id"] = -794133668
+	data["chat_id"] = -879993969
 	data["text"] = message.Content
 	data["parse_mode"] = "Markdown"
 	data["disable_notification"] = !message.Notification
