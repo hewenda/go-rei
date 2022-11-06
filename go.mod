@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/gocolly/colly v1.2.0
 	github.com/mattn/go-sqlite3 v1.14.16
+	github.com/robfig/cron v1.2.0
 	github.com/spf13/cobra v1.6.1
 )
 

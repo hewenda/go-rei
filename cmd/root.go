@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/robfig/cron"
 	"github.com/spf13/cobra"
 )
 
@@ -44,13 +45,14 @@ func init() {
 }
 
 func SkuMonit() {
-	SkuLoadAndNotify()
-	// ticker := time.NewTicker(1 * time.Hour)
-	// defer ticker.Stop()
 
-	// for range ticker.C {
-	// 	SkuLoadAndNotify()
-	// }
+	c := cron.New()
+	c.AddFunc("0 0,30 * * * *", func() {
+		SkuLoadAndNotify()
+	})
+
+	c.Start()
+	select {}
 }
 
 func Execute() {

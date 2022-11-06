@@ -36,30 +36,28 @@ func GetAvailableSkus() (string, bool) {
 		}
 		if result.Len() > 0 {
 			result.WriteString("\n")
-			output.WriteString(fmt.Sprintf("[%s](%s)\n``` %s ```", data.Title, item.Url, result.String()))
+			output.WriteString(fmt.Sprintf("[%s](%s)\n```%s ```", data.Title, item.Url, result.String()))
 		}
 	}
 
 	return output.String(), oops
 }
 
-func PostMessage(token string) {
-	content, oops := GetAvailableSkus()
+type Message struct {
+	Token        string
+	Notification bool
+	Content      string
+}
 
-	if !oops {
-		return
-	}
-
-	baseUrl := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", token)
+func PostMessage(message Message) {
+	baseUrl := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", message.Token)
 
 	data := make(map[string]interface{})
 	data["chat_id"] = -794133668
-	data["text"] = content
+	data["text"] = message.Content
 	data["parse_mode"] = "Markdown"
-	data["disable_notification"] = !oops
+	data["disable_notification"] = !message.Notification
 	b, _ := json.Marshal(data)
-
-	fmt.Println(content)
 
 	_, err := http.Post(
 		baseUrl,
@@ -69,11 +67,16 @@ func PostMessage(token string) {
 	if err != nil {
 		fmt.Println(err)
 	}
-
 }
 
 func SkuLoadAndNotify() {
 	for _, user := range storage.QueryUser() {
-		PostMessage(user.Token)
+		content, oops := GetAvailableSkus()
+
+		PostMessage(Message{
+			Token:        user.Token,
+			Content:      content,
+			Notification: oops,
+		})
 	}
 }
