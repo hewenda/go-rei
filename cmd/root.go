@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"hewenda/go-rei/storage"
 	"log"
@@ -14,10 +15,14 @@ var addUrl string
 var isMonit bool
 var delId string
 
-func listProcut() {
+func listProcut() string {
+	output := new(bytes.Buffer)
+
 	for _, item := range storage.QueryProduct() {
-		fmt.Println(item.Id, item.Url)
+		output.WriteString(fmt.Sprintf("[%d] %s", item.Id, item.Url))
 	}
+
+	return output.String()
 }
 
 var rootCmd = &cobra.Command{
@@ -26,14 +31,14 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(addUrl) > 0 {
 			SkuAdd(addUrl)
-			listProcut()
+			fmt.Println(listProcut())
 		} else if isMonit {
 			SkuMonit()
 		} else if len(delId) > 0 {
 			storage.DeleteProduct(delId)
-			listProcut()
+			fmt.Println(listProcut())
 		} else {
-			listProcut()
+			fmt.Println(listProcut())
 		}
 	},
 }
@@ -49,6 +54,16 @@ func SkuMonit() {
 	c := cron.New()
 	c.AddFunc("0 0 10-23 * * *", func() {
 		SkuLoadAndNotify()
+	})
+
+	c.AddFunc("0 30 16 * * *", func() {
+		for _, user := range storage.QueryUser() {
+			PostMessage(Message{
+				Content:      listProcut(),
+				Notification: false,
+				Token:        user.Token,
+			})
+		}
 	})
 
 	c.Start()
