@@ -19,7 +19,7 @@ func listProcut() string {
 	output := new(bytes.Buffer)
 
 	for _, item := range storage.QueryProduct() {
-		output.WriteString(fmt.Sprintf("[%d] %s", item.Id, item.Url))
+		output.WriteString(fmt.Sprintf("[%d] %s\n", item.Id, item.Url))
 	}
 
 	return output.String()
