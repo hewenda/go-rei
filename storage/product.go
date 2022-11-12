@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"database/sql"
 	"log"
 	"strconv"
 
@@ -28,14 +27,6 @@ func CreateProductTable() {
 }
 
 func InsertProduct(idString string, url string) {
-	db, err := sql.Open("sqlite3", "./storage.db")
-
-	if err != nil {
-		panic(err)
-	}
-
-	defer db.Close()
-
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatal(err)
@@ -64,14 +55,6 @@ func InsertProduct(idString string, url string) {
 }
 
 func QueryProduct() []Product {
-	db, err := sql.Open("sqlite3", "./storage.db")
-
-	if err != nil {
-		panic(err)
-	}
-
-	defer db.Close()
-
 	rows, err := db.Query("select id, url from product")
 	if err != nil {
 		log.Fatal(err)

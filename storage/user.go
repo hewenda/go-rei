@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"database/sql"
 	"log"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -74,14 +73,6 @@ func DeleteUser(token string) {
 }
 
 func QueryUser() []User {
-	db, err := sql.Open("sqlite3", "./storage.db")
-
-	if err != nil {
-		panic(err)
-	}
-
-	defer db.Close()
-
 	rows, err := db.Query("select id, token from user")
 	if err != nil {
 		log.Fatal(err)

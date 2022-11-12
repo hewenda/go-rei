@@ -9,6 +9,15 @@ import (
 	"net/http"
 )
 
+func containsDaily(skus []storage.Daily, id string) bool {
+	for _, dailySku := range skus {
+		if id == dailySku.Sku {
+			return true
+		}
+	}
+	return false
+}
+
 func GetAvailableSkus() (string, bool) {
 	product := storage.QueryProduct()
 
@@ -21,7 +30,13 @@ func GetAvailableSkus() (string, bool) {
 		data := spider.GetUrlModel(item.Url)
 		skus := spider.GetAvailableSkus(data)
 
+		dailyCache := storage.QueryDailySku()
+
 		for _, sku := range skus {
+			if containsDaily(dailyCache, sku.SkuID) {
+				break
+			}
+
 			if sku.Price.SavingsPercentage != nil {
 				oops = true
 
@@ -31,6 +46,7 @@ func GetAvailableSkus() (string, bool) {
 						sku.Color.DisplayLabel, sku.Size.Name, sku.Price.CompareAt.Value, sku.Price.Price.Value,
 					),
 				)
+				storage.InsertDailySku(sku.SkuID, sku.Price.CompareAt.Value, sku.Price.Price.Value)
 				result.WriteString(fmt.Sprintf(" %v%%Off\n", sku.Price.SavingsPercentage))
 			}
 		}
@@ -58,6 +74,7 @@ func PostMessage(message Message) {
 	data["text"] = message.Content
 	data["parse_mode"] = "Markdown"
 	data["disable_notification"] = !message.Notification
+	data["disable_web_page_preview"] = true
 	b, _ := json.Marshal(data)
 
 	_, err := http.Post(

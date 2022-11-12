@@ -57,6 +57,8 @@ func SkuMonit() {
 	})
 
 	c.AddFunc("0 30 16 * * *", func() {
+		storage.ClearDaily()
+
 		for _, user := range storage.QueryUser() {
 			PostMessage(Message{
 				Content:      listProcut(),
