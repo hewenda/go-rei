@@ -52,20 +52,8 @@ func init() {
 func SkuMonit() {
 
 	c := cron.New()
-	c.AddFunc("0 0 10-23 * * *", func() {
+	c.AddFunc("0 0,30 10-23 * * *", func() {
 		SkuLoadAndNotify()
-	})
-
-	c.AddFunc("0 30 16 * * *", func() {
-		storage.ClearDaily()
-
-		for _, user := range storage.QueryUser() {
-			PostMessage(Message{
-				Content:      listProcut(),
-				Notification: false,
-				Token:        user.Token,
-			})
-		}
 	})
 
 	c.Start()
