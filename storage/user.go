@@ -1,9 +1,8 @@
 package storage
 
 import (
-	"log"
-
 	_ "github.com/mattn/go-sqlite3"
+	log "github.com/sirupsen/logrus"
 )
 
 type User struct {
@@ -20,7 +19,7 @@ func CreateUserTable() {
 	`
 	_, err := db.Exec(sqlStmt)
 	if err != nil {
-		log.Printf("%q: %s\n", err, sqlStmt)
+		log.Fatal(err)
 		return
 	}
 }

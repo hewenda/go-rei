@@ -7,6 +7,8 @@ import (
 	"hewenda/go-rei/spider"
 	"hewenda/go-rei/storage"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func containsDaily(skus []storage.Daily, id string) bool {
@@ -34,10 +36,13 @@ func GetAvailableSkus() (string, bool) {
 
 		for _, sku := range skus {
 			if containsDaily(dailyCache, sku.SkuID) {
+				log.Infof("Sku [%s] inside daily cache, jump over !", sku.SkuID)
 				break
 			}
 
 			if sku.Price.SavingsPercentage != nil {
+				log.Infof("Sku [%s] savings percent %s", sku.SkuID, sku.Price.SavingsPercentage)
+
 				oops = true
 
 				result.WriteString(
@@ -48,6 +53,8 @@ func GetAvailableSkus() (string, bool) {
 				)
 				storage.InsertDailySku(sku.SkuID, sku.Price.CompareAt.Value, sku.Price.Price.Value)
 				result.WriteString(fmt.Sprintf(" %v%%Off\n", sku.Price.SavingsPercentage))
+			} else {
+				log.Infof("Sku [%s] savings percent %s, jump over !", sku.SkuID, sku.Price.SavingsPercentage)
 			}
 		}
 		if result.Len() > 0 {
@@ -83,7 +90,7 @@ func PostMessage(message Message) {
 		bytes.NewBuffer(b),
 	)
 	if err != nil {
-		fmt.Println(err)
+		log.Errorf("Post message error: ", err)
 	}
 }
 

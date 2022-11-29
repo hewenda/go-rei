@@ -2,9 +2,9 @@ package storage
 
 import (
 	"database/sql"
-	"log"
 
 	_ "github.com/mattn/go-sqlite3"
+	log "github.com/sirupsen/logrus"
 )
 
 var db *sql.DB
@@ -15,7 +15,7 @@ func OpenDatabase() error {
 	db, err = sql.Open("sqlite3", "./storage.db")
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("DB open error: %v", err)
 	}
 
 	CreateTable()

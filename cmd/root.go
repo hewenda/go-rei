@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"fmt"
 	"hewenda/go-rei/storage"
-	"log"
 	"os"
 
 	"github.com/robfig/cron"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -30,14 +30,22 @@ var rootCmd = &cobra.Command{
 	Short: "rei spider",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(addUrl) > 0 {
+			log.Println("Run rei --add ", addUrl)
+
 			SkuAdd(addUrl)
 			fmt.Println(listProcut())
 		} else if isMonit {
+			log.Println("Run rei --monit")
+
 			SkuMonit()
 		} else if len(delId) > 0 {
+			log.Println("Run rei --del ", delId)
+
 			storage.DeleteProduct(delId)
 			fmt.Println(listProcut())
 		} else {
+			log.Println("Run rei --list")
+
 			fmt.Println(listProcut())
 		}
 	},
@@ -53,6 +61,7 @@ func SkuMonit() {
 
 	c := cron.New()
 	c.AddFunc("0 0,30 10-23 * * *", func() {
+		log.Info("Run cron query job")
 		SkuLoadAndNotify()
 	})
 

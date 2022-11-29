@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"hewenda/go-rei/storage"
-	"log"
 	"regexp"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var productUrl string
@@ -15,7 +16,7 @@ func SkuAdd(url string) {
 	productUrl = url
 	matched, err := regexp.MatchString(urlPartten, productUrl)
 	if !matched || err != nil {
-		log.Fatal("Format url error")
+		log.Fatal("Format url error: ", productUrl)
 	}
 
 	urlCompile := regexp.MustCompile(urlPartten)

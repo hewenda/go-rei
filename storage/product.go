@@ -1,10 +1,10 @@
 package storage
 
 import (
-	"log"
 	"strconv"
 
 	_ "github.com/mattn/go-sqlite3"
+	log "github.com/sirupsen/logrus"
 )
 
 type Product struct {
@@ -21,7 +21,7 @@ func CreateProductTable() {
 	`
 	_, err := db.Exec(sqlStmt)
 	if err != nil {
-		log.Printf("%q: %s\n", err, sqlStmt)
+		log.Fatal(err)
 		return
 	}
 }
@@ -29,7 +29,7 @@ func CreateProductTable() {
 func InsertProduct(idString string, url string) {
 	tx, err := db.Begin()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("DB insert product %s error: %v", idString, err)
 	}
 	stmt, err := tx.Prepare("insert or replace into product(id, url) values(?, ?)")
 	if err != nil {

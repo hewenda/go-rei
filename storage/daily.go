@@ -1,9 +1,8 @@
 package storage
 
 import (
-	"log"
-
 	_ "github.com/mattn/go-sqlite3"
+	log "github.com/sirupsen/logrus"
 )
 
 type Daily struct {
@@ -30,6 +29,8 @@ func CreateDailyTable() {
 }
 
 func InsertDailySku(sku string, compare float64, price float64) {
+	log.Infof("DB insert daily cache Sku [%s]", sku)
+
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatal(err)
@@ -50,6 +51,7 @@ func InsertDailySku(sku string, compare float64, price float64) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Infof("DB insert daily cache Sku [%s] done", sku)
 }
 
 func ClearDaily() {
@@ -74,6 +76,8 @@ func ClearDaily() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	log.Info("DB clear daily cache done")
 }
 
 func QueryDailySku() []Daily {

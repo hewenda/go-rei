@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"hewenda/go-rei/storage"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -15,8 +16,12 @@ var userCmd = &cobra.Command{
 	Short: "User token manager",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(addToken) > 0 {
+			log.Infof("Run user --add %s", addToken)
+
 			storage.InsertUser(addToken)
 		} else if len(deleteToken) > 0 {
+			log.Infof("Run user --del %s", deleteToken)
+
 			storage.DeleteUser(deleteToken)
 		}
 
